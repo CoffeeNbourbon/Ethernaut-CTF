@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.0;
+
+contract Vault {
+  bool public locked;
+  bytes32 private password;
+
+  constructor(bytes32 _password) public {
+    locked = true;
+    password = _password;
+  }
+
+  function unlock(bytes32 _password) public {
+    if (password == _password) {
+      locked = false;
+    }
+  }
+}
+
+(async () => {
+    try {
+        console.log('Running getVaultPassword...')
+    
+        // Address of the Ethernaut Vault instance
+        const contractAddress = 0x178a47d670C5aa2091542b5101665263255D422C;
+        // In the Deploy & Run transactions tab,
+        // Set the environment to "Injected Web3" (which is MetaMask)
+        // And don't forget to set your MetaMask to use Rinkeby!
+        const provider = new ethers.providers.Web3Provider(web3Provider);
+        const slot1 = await provider.getStorageAt(contractAddress, 1);
+        console.log('Cracked! The password is:', slot1);
+    } catch (e) {
+        console.log(e.message);
+    }
+})();
