@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.0;
+
+contract Delegate {
+  address public owner; // Slot 0
+  
+  // ...
+  function pwn() public {
+    owner = msg.sender; // owner is a reference to Slot 0
+  }
+}
+contract Delegation {
+  address public owner; // Slot 0
+  Delegate delegate; // Slot 1
+  // ...
+  
+  fallback() external {
+    (bool result,) = address(delegate).delegatecall(msg.data);
+    if (result) {
+      this;
+    }
+  }
+}
